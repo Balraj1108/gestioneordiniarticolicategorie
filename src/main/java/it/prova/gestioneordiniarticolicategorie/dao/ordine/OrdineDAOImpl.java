@@ -1,10 +1,12 @@
 package it.prova.gestioneordiniarticolicategorie.dao.ordine;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
 public class OrdineDAOImpl implements OrdineDAO {
@@ -60,6 +62,32 @@ public class OrdineDAOImpl implements OrdineDAO {
 		query.setParameter("idOrdine", id);
 		return query.getResultList().stream().findFirst().orElse(null);
 	}
+
+	@Override
+	public List<Ordine> listaOrdiniDeterminataCategoria(String codiceCategoria) {
+		TypedQuery<Ordine> query = entityManager.createQuery("select o FROM Ordine o join fetch o.articoli a join fetch a.categorie c where codice = ?1",Ordine.class);
+		query.setParameter(1, codiceCategoria);
+		return query.getResultList();
+	}
+
+	@Override
+	public Ordine ordineSpedizioneRecenteDataCategoria(Categoria categoriaInput) {
+																														
+		TypedQuery<Ordine> query = entityManager.createQuery("select o FROM Ordine o join fetch o.articoli a join fetch a.categorie c where c = ?1 and dataspedizione <= ?2 order by dataspedizione desc",Ordine.class);
+		query.setParameter(1, categoriaInput);
+		query.setParameter(2, new Date());
+		return query.getResultList().get(0);
+	}
+
+	@Override
+	public List<String> listaIndirizziDatoCodiceSerialeInput(String codiceSerialeInput) {
+		TypedQuery<String> query = entityManager.createQuery
+				("select DISTINCT o.indirizzoSpedizione  from Ordine o join  o.articoli a join  a.categorie c where numeroseriale like ?1",String.class);
+		query.setParameter(1, "%"  + codiceSerialeInput + "%");
+		return query.getResultList();
+	}
+
+
 	
 	
 }

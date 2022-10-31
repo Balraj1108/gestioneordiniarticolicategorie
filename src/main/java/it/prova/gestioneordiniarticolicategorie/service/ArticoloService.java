@@ -22,6 +22,14 @@ public interface ArticoloService {
 	
 	public void scollegaArticoliDaCategoria(Long idArticolo) throws Exception;
 	
+	public Long sommaPrezziArticoliLegatiCategoria(Categoria categoriaInput) throws Exception;
+	
+	public Long sommaPrezziArticoliStessoDestinatario(String indirizzoInput, String nomeInput) throws Exception;
+	
+	public List<Articolo> listaArticoliSituazioneStrana() throws Exception;
+	
+	public Articolo findByIdFetchingCategorie(Long id);
+	
 	
 	public void setArticoloDAO(ArticoloDAO articoloDAO);
 }

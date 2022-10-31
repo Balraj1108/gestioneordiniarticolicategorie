@@ -1,5 +1,6 @@
 package it.prova.gestioneordiniarticolicategorie.test;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -50,6 +51,21 @@ public class MyTest {
 			
 			testRimozioneOrdineCollegato(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
 			
+			testListaOrdiniDeterminataCategoria(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testListaCategorieArticoliDiUnOrdine(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testSommaPrezziArticoliLegatiCategoria(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testOrdineSpedizioneRecenteDataCategoria(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testListaCodiciCategorieDatoMeseAnnoInput(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testSommaPrezziArticoliStessoDestinatario(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testListaIndirizziDatoCodiceSerialeInput(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
+			
+			testListaArticoliSituazioneStrana(ordineServiceInstance, articoloServiceInstance, categoriaServiceInstance);
 			
 			
 			
@@ -293,6 +309,12 @@ public class MyTest {
 		
 		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
 		
+		Categoria categoriaRicaricata = categoriaServiceInstance.findCategoriaByIdFetchingArticoli(categoriaTest.getId());
+		
+		if (categoriaRicaricata.getArticoli().isEmpty()) {
+			throw new RuntimeException("testAggiungiArticoloAdCategoria FALLITO: collegamento non riuscito");
+		}
+		
 		
 		System.out.println(".......testAggiungiArticoloAdCategoria fine: PASSED.............");
 	}
@@ -316,6 +338,12 @@ public class MyTest {
 		categoriaServiceInstance.insert(categoriaTest);
 		
 		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloTest, categoriaTest);
+		
+		Articolo articoloRicaricato = articoloServiceInstance.findByIdFetchingCategorie(articoloTest.getId());
+		
+		if (articoloRicaricato.getCategorie().isEmpty()) {
+			throw new RuntimeException("testAggiungiCategoriaAdArticolo FALLITO: collegamento non riuscito");
+		}
 		
 		
 		System.out.println(".......testAggiungiCategoriaAdArticolo fine: PASSED.............");
@@ -342,6 +370,10 @@ public class MyTest {
 		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloTest, categoriaTest);
 		
 		articoloServiceInstance.delete(articoloTest.getId());
+		
+		if (articoloServiceInstance.get(articoloTest.getId()) != null) {
+			throw new RuntimeException("testRimozioneArticoloCollegato FALLITO: articolo non rimosso");
+		}
 		
 		
 		System.out.println(".......testRimozioneArticoloCollegato fine: PASSED.............");
@@ -370,6 +402,10 @@ public class MyTest {
 		articoloServiceInstance.scollegaArticoliDaCategoria(articoloTest.getId());
 		
 		categoriaServiceInstance.delete(categoriaTest.getId());
+		
+		if (categoriaServiceInstance.get(categoriaTest.getId()) != null) {
+			throw new RuntimeException("testRimozioneCategoriaCollegata FALLITO: categoria non rimossa");
+		}
 		
 		
 		System.out.println(".......testRimozioneCategoriaCollegata fine: PASSED.............");
@@ -407,12 +443,337 @@ public class MyTest {
 		
 		ordineServiceInstance.delete(ordineTest.getId());
 		
+		if (ordineServiceInstance.get(ordineTest.getId()) != null) {
+			throw new RuntimeException("testRimozioneOrdineCollegato FALLITO: ordine non rimosso");
+		}
+		
 		
 		
 		System.out.println(".......testRimozioneOrdineCollegato fine: PASSED.............");
 	}
 	
 	
+	private static void testListaOrdiniDeterminataCategoria(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testListaOrdiniDeterminataCategoria inizio.............");
+		
+		Ordine ordineTest = new Ordine("mari","via napoli", new Date(), new Date());
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Categoria categoriaTest = new Categoria("cose di cas" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloTest, categoriaTest);
+		
+		String codiceCategoriaTest = categoriaTest.getCodice();
+		
+		//System.out.println(ordineServiceInstance.listaOrdiniDeterminataCategoria(codiceCategoriaTest).size());
+		
+		if (ordineServiceInstance.listaOrdiniDeterminataCategoria(codiceCategoriaTest).size() != 1) {
+			throw new RuntimeException("testListaOrdiniDeterminataCategoria FALLITO: dati non coincidono");
+		}
+
+		
+		
+		System.out.println(".......testListaOrdiniDeterminataCategoria fine: PASSED.............");
+	}
+	
+	
+	private static void testListaCategorieArticoliDiUnOrdine(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testListaCategorieArticoliDiUnOrdine inizio.............");
+		
+		Ordine ordineTest = new Ordine("mari","via napoli", new Date(), new Date());
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 4, new Date());
+		
+		articoloTest1.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest1);
+		
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		Categoria categoriaTest1 = new Categoria("cose di ufficio" ,"d564565d");
+		
+		categoriaServiceInstance.insert(categoriaTest1);
+		
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest1);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		
+		//System.out.println(categoriaServiceInstance.listaCategorieArticoliDiUnOrdine(ordineTest).size());
+		
+		if (categoriaServiceInstance.listaCategorieArticoliDiUnOrdine(ordineTest).size() != 2) {
+			throw new RuntimeException("testListaCategorieArticoliDiUnOrdine FALLITO: dati non coincidono");
+		}
+
+		
+		
+		System.out.println(".......testListaCategorieArticoliDiUnOrdine fine: PASSED.............");
+	}
+	
+	private static void testSommaPrezziArticoliLegatiCategoria(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testSommaPrezziArticoliLegatiCategoria inizio.............");
+		
+		Ordine ordineTest = new Ordine("mari","via napoli", new Date(), new Date());
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 4, new Date());
+		
+		articoloTest1.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest1);
+		
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		
+		
+		System.out.println(articoloServiceInstance.sommaPrezziArticoliLegatiCategoria(categoriaTest));
+		
+
+		if (articoloServiceInstance.sommaPrezziArticoliLegatiCategoria(categoriaTest) != 58) {
+			throw new RuntimeException("testSommaPrezziArticoliLegatiCategoria FALLITO: dati non coincidono");
+		}
+		
+		
+		System.out.println(".......testSommaPrezziArticoliLegatiCategoria fine: PASSED.............");
+	}
+	
+	private static void testOrdineSpedizioneRecenteDataCategoria(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testOrdineSpedizioneRecenteDataCategoria inizio.............");
+		
+		Date dataTest1 = new SimpleDateFormat("dd-MM-yyyy").parse("10-10-2020");
+		Ordine ordineTest = new Ordine("mari","via napoli", dataTest1, dataTest1);
+		ordineServiceInstance.insert(ordineTest);
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		articoloTest.setOrdine(ordineTest);
+		articoloServiceInstance.insert(articoloTest);
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 4, new Date());
+		articoloTest1.setOrdine(ordineTest);
+		articoloServiceInstance.insert(articoloTest1);
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		categoriaServiceInstance.insert(categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		Date dataTest = new SimpleDateFormat("dd-MM-yyyy").parse("10-10-2021");
+		
+		Ordine ordineTest1 = new Ordine("luigi","via bologna", dataTest, dataTest);
+		ordineServiceInstance.insert(ordineTest1);
+		Articolo articoloTest3 = new Articolo("armdsadi","fddsd54", 44, new Date());
+		articoloTest3.setOrdine(ordineTest1);
+		articoloServiceInstance.insert(articoloTest3);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest3, categoriaTest);
+		
+		
+		//System.out.println(ordineServiceInstance.ordineSpedizioneRecenteDataCategoria(categoriaTest).getDataSpedizione());
+		
+		if (!(ordineServiceInstance.ordineSpedizioneRecenteDataCategoria(categoriaTest).getNomeDestinatario().equals("luigi"))) {
+			throw new RuntimeException("testOrdineSpedizioneRecenteDataCategoria FALLITO: dati non coincidono");
+		}
+		
+		
+		System.out.println(".......testOrdineSpedizioneRecenteDataCategoria fine: PASSED.............");
+	}
+	
+	
+	private static void testListaCodiciCategorieDatoMeseAnnoInput(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testListaCodiciCategorieDatoMeseAnnoInput inizio.............");
+		
+		Date dataTest = new SimpleDateFormat("dd-MM-yyyy").parse("11-11-2020");
+		Ordine ordineTest = new Ordine("mari","via napoli", dataTest, dataTest);
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, dataTest);
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 4, dataTest);
+		
+		articoloTest1.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest1);
+		
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		Categoria categoriaTest1 = new Categoria("cose di ufficio" ,"d564565d");
+		
+		categoriaServiceInstance.insert(categoriaTest1);
+		
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest1);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		
+		//System.out.println(categoriaServiceInstance.listaCodiciCategorieDatoMeseAnnoInput(11, 2020));
+		
+		if (categoriaServiceInstance.listaCodiciCategorieDatoMeseAnnoInput(11, 2020).size() != 2) {
+			throw new RuntimeException("testListaCodiciCategorieDatoMeseAnnoInput FALLITO: dati non coincidono");
+		}
+		
+
+		
+		
+		System.out.println(".......testListaCodiciCategorieDatoMeseAnnoInput fine: PASSED.............");
+	}
+	
+	
+	private static void testSommaPrezziArticoliStessoDestinatario(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testSommaPrezziArticoliStessoDestinatario inizio.............");
+		
+		Ordine ordineTest = new Ordine("mariop","via napoli", new Date(), new Date());
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 40, new Date());
+		
+		articoloTest1.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest1);
+		
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		
+		String nome = "mariop";
+		String indirizzo = "via napoli";
+		
+		//System.out.println(articoloServiceInstance.sommaPrezziArticoliStessoDestinatario(indirizzo, nome));
+		
+		if (articoloServiceInstance.sommaPrezziArticoliStessoDestinatario(indirizzo, nome) != 94) {
+			throw new RuntimeException("testSommaPrezziArticoliStessoDestinatario FALLITO: dati non coincidono");
+		}
+		
+		System.out.println(".......testSommaPrezziArticoliStessoDestinatario fine: PASSED.............");
+	}
+	
+	
+	private static void testListaIndirizziDatoCodiceSerialeInput(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testListaIndirizziDatoCodiceSerialeInput inizio.............");
+		
+		Date dataTest1 = new SimpleDateFormat("dd-MM-yyyy").parse("10-10-2020");
+		Ordine ordineTest = new Ordine("mari","via napoli 40", dataTest1, dataTest1);
+		ordineServiceInstance.insert(ordineTest);
+		Articolo articoloTest = new Articolo("armadi","c-lky5-a", 54, new Date());
+		articoloTest.setOrdine(ordineTest);
+		articoloServiceInstance.insert(articoloTest);
+		Articolo articoloTest1 = new Articolo("scrivania","n-lky5-o", 4, new Date());
+		articoloTest1.setOrdine(ordineTest);
+		articoloServiceInstance.insert(articoloTest1);
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		categoriaServiceInstance.insert(categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		Date dataTest = new SimpleDateFormat("dd-MM-yyyy").parse("10-10-2021");
+		
+		Ordine ordineTest1 = new Ordine("luigi","via bologna 55", dataTest, dataTest);
+		ordineServiceInstance.insert(ordineTest1);
+		Articolo articoloTest3 = new Articolo("armdsadi","p-lky5-l", 44, new Date());
+		articoloTest3.setOrdine(ordineTest1);
+		articoloServiceInstance.insert(articoloTest3);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest3, categoriaTest);
+		
+		
+		String codiceSeriale = "lky5";
+		
+		//System.out.println(ordineServiceInstance.listaIndirizziDatoCodiceSerialeInput(codiceSeriale));
+		
+		if (ordineServiceInstance.listaIndirizziDatoCodiceSerialeInput(codiceSeriale).size() != 2) {
+			throw new RuntimeException("testListaIndirizziDatoCodiceSerialeInput FALLITO: dati non coincidono");
+		}
+		
+		System.out.println(".......testListaIndirizziDatoCodiceSerialeInput fine: PASSED.............");
+	}
+	
+	
+	private static void testListaArticoliSituazioneStrana(OrdineService ordineServiceInstance, 
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance ) throws Exception{
+		System.out.println(".......testListaArticoliSituazioneStrana inizio.............");
+		
+		Date dataTest = new SimpleDateFormat("dd-MM-yyyy").parse("10-10-2020");
+		Ordine ordineTest = new Ordine("mariop","via napoli", new Date(), dataTest);
+		
+		ordineServiceInstance.insert(ordineTest);
+		
+		Articolo articoloTest = new Articolo("armadi","fd54", 54, new Date());
+		
+		articoloTest.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest);
+		
+		Articolo articoloTest1 = new Articolo("scrivania","f465d54", 40, new Date());
+		
+		articoloTest1.setOrdine(ordineTest);
+		
+		articoloServiceInstance.insert(articoloTest1);
+		
+		Categoria categoriaTest = new Categoria("cose di casa" ,"dsa5d");
+		
+		categoriaServiceInstance.insert(categoriaTest);
+		
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest1, categoriaTest);
+		categoriaServiceInstance.aggiungiArticoloACategoria(articoloTest, categoriaTest);
+		
+		
+		//System.out.println(articoloServiceInstance.listaArticoliSituazioneStrana().size());
+		
+		if (articoloServiceInstance.listaArticoliSituazioneStrana().size() != 2) {
+			throw new RuntimeException("testListaArticoliSituazioneStrana FALLITO: dati non coicidono");
+		}
+		
+		
+		System.out.println(".......testListaArticoliSituazioneStrana fine: PASSED.............");
+	}
 	
 
 }
