@@ -29,6 +29,7 @@ public class Categoria {
 	@Column(name = "codice")
 	private String codice;
 	
+	
 	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "categorie")
 	private Set<Articolo> articoli = new HashSet<>();
 	
@@ -43,12 +44,15 @@ public class Categoria {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Categoria(String descrizione, String codice, Set<Articolo> articoli) {
+	
+	
+	public Categoria(String descrizione, String codice) {
 		super();
 		this.descrizione = descrizione;
 		this.codice = codice;
-		this.articoli = articoli;
 	}
+
+
 
 	public Long getId() {
 		return id;

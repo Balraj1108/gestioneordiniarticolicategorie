@@ -50,6 +50,13 @@ public class ArticoloDAOImpl implements ArticoloDAO {
 		}
 		entityManager.remove(entityManager.merge(input));
 		
+	}
+
+	@Override
+	public void scollegaArticoliDaCategoria(Long idArticolo) throws Exception {
+		// TODO Auto-generated method stub
+		entityManager.createNativeQuery("delete from articolo_categoria where articolo_id=?1").
+		setParameter(1, idArticolo).executeUpdate();
 	}	
 	
 }

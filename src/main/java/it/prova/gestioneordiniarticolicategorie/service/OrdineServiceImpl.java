@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 
 import it.prova.gestioneordiniarticolicategorie.dao.EntityManagerUtil;
 import it.prova.gestioneordiniarticolicategorie.dao.ordine.OrdineDAO;
+import it.prova.gestioneordiniarticolicategorie.exception.OrdineConArticoloCollegatoException;
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
 
@@ -127,6 +128,12 @@ public class OrdineServiceImpl implements OrdineService {
 
 			// uso l'injection per il dao
 			ordineDAO.setEntityManager(entityManager);
+			
+			
+			if (!(ordineDAO.findByIdFetchingArticoli(id).getArticoli().isEmpty())) {
+				throw new OrdineConArticoloCollegatoException("Questo ordine ha degli articoli");
+			}
+		
 
 			// eseguo quello che realmente devo fare
 			ordineDAO.delete(ordineDAO.get(id));
@@ -140,5 +147,30 @@ public class OrdineServiceImpl implements OrdineService {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
 		
-	}	
+	}
+
+
+	@Override
+	public Ordine findByIdFetchingArticoli(Long id) {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+		    return	ordineDAO.findByIdFetchingArticoli(id);
+
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
 }

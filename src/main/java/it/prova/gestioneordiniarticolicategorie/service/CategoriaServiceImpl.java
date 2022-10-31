@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 
 import it.prova.gestioneordiniarticolicategorie.dao.EntityManagerUtil;
 import it.prova.gestioneordiniarticolicategorie.dao.categoria.CategoriaDAO;
+import it.prova.gestioneordiniarticolicategorie.model.Articolo;
 import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 
 public class CategoriaServiceImpl implements CategoriaService {
@@ -139,5 +140,37 @@ public class CategoriaServiceImpl implements CategoriaService {
 			EntityManagerUtil.closeEntityManager(entityManager);
 	
 		}	
+	}
+
+
+	@Override
+	public void aggiungiArticoloACategoria(Articolo articoloInstance, Categoria categoriaInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			categoriaDAO.setEntityManager(entityManager);
+
+			// 'attacco' alla sessione di hibernate i due oggetti
+			// così jpa capisce che se risulta presente quel cd non deve essere inserito
+			articoloInstance = entityManager.merge(articoloInstance);
+			categoriaInstance = entityManager.merge(categoriaInstance);
+
+			articoloInstance.getCategorie().add(categoriaInstance);
+
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+		
 	}
 }

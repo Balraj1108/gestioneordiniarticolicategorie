@@ -19,6 +19,8 @@ public interface OrdineService {
 	
 	public void delete(Long idOrdine) throws Exception;
 	
+	public Ordine findByIdFetchingArticoli(Long id);
+	
 	
 	
 	

@@ -5,6 +5,6 @@ import it.prova.gestioneordiniarticolicategorie.model.Articolo;
 
 public interface ArticoloDAO extends IBaseDAO<Articolo> {
 
-	
+	public void scollegaArticoliDaCategoria(Long idArticolo) throws Exception;
 	
 }

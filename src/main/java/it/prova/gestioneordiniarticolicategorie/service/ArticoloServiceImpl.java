@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import it.prova.gestioneordiniarticolicategorie.dao.EntityManagerUtil;
 import it.prova.gestioneordiniarticolicategorie.dao.articolo.ArticoloDAO;
 import it.prova.gestioneordiniarticolicategorie.model.Articolo;
+import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 
 public class ArticoloServiceImpl implements ArticoloService {
 
@@ -141,5 +142,63 @@ public class ArticoloServiceImpl implements ArticoloService {
 		}	
 	}
 
+
+	@Override
+	public void aggiungiCategoriaAdArticolo(Articolo articoloInstance, Categoria categoriaInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// 'attacco' alla sessione di hibernate i due oggetti
+			// così jpa capisce che se risulta presente quel cd non deve essere inserito
+			articoloInstance = entityManager.merge(articoloInstance);
+			categoriaInstance = entityManager.merge(categoriaInstance);
+
+			articoloInstance.getCategorie().add(categoriaInstance);
+
+			//categoriaInstance.getArticoli().add(articoloInstance);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+		
+	}
+
+
+	@Override
+	public void scollegaArticoliDaCategoria(Long idArticolo) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			articoloDAO.scollegaArticoliDaCategoria(idArticolo);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
 	
 }

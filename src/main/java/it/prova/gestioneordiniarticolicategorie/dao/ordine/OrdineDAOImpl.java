@@ -3,6 +3,7 @@ package it.prova.gestioneordiniarticolicategorie.dao.ordine;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
@@ -51,6 +52,14 @@ public class OrdineDAOImpl implements OrdineDAO {
 		}
 		entityManager.remove(entityManager.merge(input));
 		
-	}	
+	}
+
+	@Override
+	public Ordine findByIdFetchingArticoli(Long id) {
+		TypedQuery<Ordine> query = entityManager.createQuery("select o FROM Ordine o left join fetch o.articoli a where o.id = :idOrdine",Ordine.class);
+		query.setParameter("idOrdine", id);
+		return query.getResultList().stream().findFirst().orElse(null);
+	}
+	
 	
 }
